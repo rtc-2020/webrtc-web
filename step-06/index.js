@@ -1,14 +1,29 @@
 'use strict';
 
+var fs = require('fs');
 var os = require('os');
 var nodeStatic = require('node-static');
-var http = require('http');
 var socketIO = require('socket.io');
 
 var fileServer = new(nodeStatic.Server)();
-var app = http.createServer(function(req, res) {
-  fileServer.serve(req, res);
-}).listen(8080);
+
+if (process.env.LOCALHOST_SSL_KEY && process.env.LOCALHOST_SSL_CERT) {
+  // Use key locations to run https
+  const https = require('https');
+  const key = fs.readFileSync(process.env.LOCALHOST_SSL_KEY);
+  const cert = fs.readFileSync(process.env.LOCALHOST_SSL_CERT);
+  // Cannot use const because of conditional assignment
+  // var server = https.createServer({key: key, cert: cert }, app);
+  var app = https.createServer({key: key, cert: cert }, function(req, res) {
+    fileServer.serve(req, res);
+  }).listen(8443);
+} else {
+  // Fall back to http if key locations are not defined
+  const http = require('http');
+  var app = http.createServer(function(req, res) {
+    fileServer.serve(req, res);
+  }).listen(8080);
+}
 
 var io = socketIO.listen(app);
 io.sockets.on('connection', function(socket) {
