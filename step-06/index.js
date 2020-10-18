@@ -43,7 +43,8 @@ io.sockets.on('connection', function(socket) {
       socket.join(room);
       socket.emit('joined', room, socket.id);
       io.sockets.in(room).emit('ready', room);
-      socket.broadcast.emit('ready', room);
+      // Pull Request #89
+      // socket.broadcast.emit('ready', room);
     } else { // max two clients
       socket.emit('full', room);
     }

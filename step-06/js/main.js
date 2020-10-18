@@ -62,7 +62,8 @@ socket.on('created', function(room, clientId) {
 socket.on('joined', function(room, clientId) {
   console.log('This peer has joined room', room, 'with client ID', clientId);
   isInitiator = false;
-  createPeerConnection(isInitiator, configuration);
+  // PR #89
+  //createPeerConnection(isInitiator, configuration);
   grabWebCamVideo();
 });
 
@@ -186,7 +187,10 @@ function signalingMessageCallback(message) {
 
   } else if (message.type === 'candidate') {
     peerConn.addIceCandidate(new RTCIceCandidate({
-      candidate: message.candidate
+      candidate: message.candidate,
+      // Issue 102
+      sdpMid: message.id,
+      sdpMLineIndex: message.label
     }));
 
   }
